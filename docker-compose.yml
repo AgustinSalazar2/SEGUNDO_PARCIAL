@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  dbmaria:
+    image: mariadb:10.6.14   # Nombre de la imagen existente de MariaDB
+    container_name: "mimariadb"
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: contra3
+      MYSQL_DATABASE: mymaria-db
+    volumes:
+      - './mysql:/var/lib/mysql'
+
+  mongo:
+    image: mongo:6.0
+    container_name: mimongodb
+    ports:
+      - 27017:27017
+    volumes:
+      - ./datamongo:/data/db
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: miserverAF
+    environment:
+      DATABASE_HOST: dbmaria
+      DATABASE_USER: root
+      DATABASE_PASSWORD: contra3
+      DATABASE_NAME: mymaria-db
+      MONGO_DB_URI: mongodb://mongo:27017/aguasFsa
+    restart: always
+    ports:
+      - "4000:3000"
+    depends_on:
+      - dbmaria
+      - mongo
